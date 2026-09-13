@@ -8,6 +8,8 @@
 
 # Antigravity 登录修复套件
 
+[![Release](https://img.shields.io/github/v/release/X1F2Y3/antigravity-login-patch)](https://github.com/X1F2Y3/antigravity-login-patch/releases) [![Stars](https://img.shields.io/github/stars/X1F2Y3/antigravity-login-patch)](https://github.com/X1F2Y3/antigravity-login-patch) [![License](https://img.shields.io/github/license/X1F2Y3/antigravity-login-patch)](LICENSE)
+
 > 基于实际排障记录；解决 Antigravity（反重力）及 Antigravity IDE 在大陆/代理网络环境下的登录卡死与界面汉化问题。
 > **正道**：真实打通网络 + 完成账号授权 + 官方语言包/无痕汉化，不改任何应用核心代码。
 

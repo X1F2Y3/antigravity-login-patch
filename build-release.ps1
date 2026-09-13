@@ -11,7 +11,7 @@ $dist = Join-Path $root "dist"
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
 New-Item -ItemType Directory -Path $dist | Out-Null
 
-$files = @("fix-network.bat", "fix-ide.bat", "fix-account.bat", "README.md", "recovery.md", "AGENTS.md", "LICENSE")
+$files = @("fix-network.bat", "fix-ide.bat", "fix-account.bat", "README.md", "recovery.md", "AGENTS.md", "CHANGELOG.md", "LICENSE")
 foreach ($f in $files) {
     $src = Join-Path $root $f
     if (Test-Path $src) { Copy-Item $src (Join-Path $dist $f) }
