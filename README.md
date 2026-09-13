@@ -13,7 +13,7 @@
 
 ## 为什么一直"登不进去"？
 
-Antigravity 登录卡死是**两道独立门槛**叠加造成，只修其一必然失败。
+Antigravity 登录卡死/升级受阻是**三道独立门槛**叠加造成：前两道导致"登不进去"，第三道决定"能不能买 Pro / 户口地区"。只修其一必然失败。
 
 ### 门槛一：网络层 —— `language_server` 不读代理（官方 bug）
 
@@ -44,6 +44,30 @@ HTTP CONNECT: 隧道建立成功, 目标=172.217.119.4:443, 代理=127.0.0.1:111
 
 > 坑：CLI 生成的链接末尾残缺（`...&authuser` 缺 `=0`），直接打开报 **400 that's an error**。本套件已自动补全。
 
+### 门槛三：账号户口地区 —— Google Play 国家决定 Google One / AI Pro 购买资格（常被当"死锁"）
+
+**症状**：网络全通、账号也授权了，免费档在美区代理下能用；但想升级 AI Pro 时，`one.google.com` 永远弹：
+
+> `您的 Google 帐户目前尚不支持 Google One`（英文：Your Google account currently does not support Google One）
+
+更迷惑的是：主页地址、支付资料、卡全是美区，代理也是干净美区，却依然被拒。
+
+**根因**：Google One 的资格判定**只认一个字段 —— Google Play 国家/地区**（官方规则："您能否使用 Google One，取决于您在 Google Play 中设置的国家/地区"）。大陆出生的账号，Play 国家默认=中国大陆，不在 Google One 支持列表 → 无论 IP/支付/卡是哪里的，一律拒。
+
+**与网络/授权的区别**：门槛一、二是"能不能进"，本关是"能不能买"。它也常与免费档 `403 UNSUPPORTED_LOCATION`（error 1008）同时出现——两者都是户口/地区问题，只是 1008 的闸口还看当前会话出口，购买档只认 Play 国家。
+
+**修复（官方改区通道，非 hack）**：
+1. 在**干净美区 IP** 下登录 `payments.google.com/settings` → 国家/地区 → 把个人支付资料国家/地区**切换为 United States**（若已显示美区，直接下一步）。
+2. 到 `play.google.com` → 设置 → **国家/地区和资料**，确认显示 **美国**——Google One 唯一认的就是这里。
+3. 回 `one.google.com` → 订阅 **Google AI Pro** → 用美国账单地址的卡付款。
+
+**三件事绝对别做**：
+- **别在有大陆 IP 出没的设备上做**（IP 与支付资料国家不一致会触发风控拦截）；
+- Play 国家**一年只能改一次**，确定好了再动；
+- 首次付款会把结算国家**永久锁定**为美区——全程保持干净美区出口，之后这个号≈美区户口+Pro。
+
+> 验证成功信号：购买成功 → Antigravity-Manager 重新授权该账号 → 配额跳到 Pro 档、"反代已禁用"消失。
+
 ---
 
 ## 给 AI 助手的话 / For AI coding assistants
@@ -52,6 +76,8 @@ HTTP CONNECT: 隧道建立成功, 目标=172.217.119.4:443, 代理=127.0.0.1:111
 
 - 报错 `context deadline exceeded` 或 `There was an unexpected issue setting up your account.`（`language_server` 不走代理）
 - 报错 `Your current account is not eligible for Antigravity. Verify your account to continue.`（账号从未完成产品授权）
+- 报错 `403 UNSUPPORTED_LOCATION` / `error_number: "1008"` / `not currently available in your location`（户口/出口地区问题）
+- `one.google.com` 购买 AI Pro 报 `您的 Google 帐户目前尚不支持 Google One` / `does not currently support Google One`，而账号/地址/支付资料/卡全是美区（Play 国家=户口地区，见"门槛三"）
 - Google OAuth 浏览器授权成功但应用无法跳转 / 停在 Welcome 页 / 登录后毫无反应
 - 官方 CLI 生成的验证链接打开是 `400 that's an error`（链接末尾 `&authuser` 缺 `=0`）
 - 需要界面中文化（Antigravity 桌面版 / Antigravity IDE 汉化）
@@ -76,6 +102,8 @@ fix-account.bat
 ```
 
 **换新账号时**，只需 `fix-account.bat`（新账号没有授权）；网络层修复跟账号无关，永久生效。
+
+**进阶（给账号上 Google AI Pro）**：网络与授权都过了，`one.google.com` 仍报"目前尚不支持 Google One"时，卡的是第三道门槛——Play 国家=户口地区，见上文"门槛三"章节。
 
 **启动**：
 - 桌面版：用安装目录下 `Antigravity-with-proxy.bat`，或直接双击 `Antigravity.exe`（同目录 `version.dll` 自动生效）
@@ -164,3 +192,5 @@ antigravity-hans.exe --shortcut   # 生成两个桌面中文快捷方式，日�
 # Antigravity Login Fix Suite
 
 This is a **fix kit** (not a hack): it unblocks Antigravity login in proxied networks by fixing two independent gates — (1) the official `language_server` ignores system proxy (patched via `kakajan/antigravity-patch` DLL injection, separately for the desktop app and the IDE build), and (2) the Google account has never completed the product eligibility verification (one-time browser authorization via official CLI). No application core code is modified. Chinese UI is optional via the official VS Code language pack plus `yuexps/Antigravity-Hans` dynamic injection for the classic desktop UI.
+
+A third gate is the **account domicile**: Google One eligibility is decided **solely by the Google Play country** setting. An account born in an unsupported region shows *"Your Google account currently does not support Google One"* on one.google.com even with US addresses/payment/IP — everything looks American, but Play country is still e.g. China. Fix: switch the payments country to United States via `payments.google.com/settings`, confirm Play shows **United States**, then subscribe to Google AI Pro on one.google.com (do it on a clean US residential IP; the Play country can only be changed once per year and the first purchase locks your billing country).

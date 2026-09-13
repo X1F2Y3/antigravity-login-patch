@@ -2,12 +2,13 @@
 
 ## 这套工具解决什么
 
-Antigravity（反重力）= Google 官方 AI IDE + CLI + 桌面端。在需要代理的网络环境下，登录会卡死。整套问题由**两道独立门槛**叠加而成，必须分别处理：
+Antigravity（反重力）= Google 官方 AI IDE + CLI + 桌面端。在需要代理的网络环境下，登录会卡死。整套问题由**三道独立门槛**叠加而成（前两道管"登得进去"，第三道管"能不能买 Pro/户口地区"），必须分别处理：
 
 | 门槛 | 症状 | 修复 | 工具 |
 |---|---|---|---|
 | 1. 网络层 | `context deadline exceeded`、卡在 onboarding | DLL 注入强制 language_server 走代理 | `fix-network.bat` |
 | 2. 账号层 | 登录"跳转后没反应"、登录页一直 Welcome | 完成 Google 侧 Antigravity 产品授权 | `fix-account.bat` |
+| 3. 账号户口（进阶） | 免费档能用但 `one.google.com` 拒绝买 AI Pro："目前尚不支持 Google One"；或含 403 `UNSUPPORTED_LOCATION`(1008) | Google Play 国家切到美国（官方改区通道）后重买 | README 门槛三 |
 
 > 只修其一都会失败。顺序无所谓，但两关都要过。
 
@@ -57,6 +58,8 @@ Antigravity（反重力）= Google 官方 AI IDE + CLI + 桌面端。在需要�
 |---|---|
 | `context deadline exceeded` | 网络层没装好：确认 `version.dll` 在安装目录、日志 `Programs\antigravity\logs\proxy-*.log` 有 `HTTP CONNECT: 隧道建立成功` |
 | 登录跳转后没反应 / 一直 Welcome | 账号层没过：跑 fix-account.bat 看有没有验证链接 |
+| `one.google.com` 提示"您的 Google 帐户目前尚不支持 Google One"，而地址/支付/卡全是美区 | 门槛三：Play 国家=大陆。`payments.google.com/settings` 把国家改为美国 → `play.google.com` 确认国家=美国 → 回 one.google.com 重买 |
+| 403 `UNSUPPORTED_LOCATION` / error 1008 | 免费档：确认出口为干净美区住宅 IP 并重走 OAuth/授权；购买档：按门槛三换 Play 国家 |
 | Electron 本地页面 `ERR_TIMED_OUT` | 曾手动设过 HTTPS_PROXY 环境变量 → 删除 `setx HTTPS_PROXY`（DLL 方案不需要它） |
 | 打开验证链接 400 | 链接末尾 `&authuser` 缺 `=0`，手动补全，或直接用 fix-account.bat |
 | CLI 报 not eligible 且链接打开后要等传播 | Google 侧授权成功后通常立即生效，重启桌面端即可 |
