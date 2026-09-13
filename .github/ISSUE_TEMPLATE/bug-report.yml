@@ -1,0 +1,40 @@
+name: Bug 排障报告
+description: Antigravity 登录 / 授权 / 购买卡住时提交，附上报错原文，作者据此维护方案
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: error
+    attributes:
+      label: 报错原文（原样粘贴，最重要）
+      description: 从 Antigravity 界面 / 官方 CLI / 浏览器拿到的原始报错。示例：`Your current account is not eligible for Antigravity. Verify your account to continue.`、`context deadline exceeded`、`error 1008`。
+      placeholder: 粘贴完整报错…
+    validations:
+      required: true
+  - type: dropdown
+    id: product
+    attributes:
+      label: 产品
+      options:
+        - Antigravity 桌面版
+        - Antigravity IDE
+        - Google AI 订阅（Google One / AI Pro）
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 简述：走了哪些 fix（fix-network / fix-ide / fix-account）？是否已换 Play 国家？
+      placeholder: 1. 跑 fix-network.bat ... 2. ... 3. 仍报错
+  - type: textarea
+    id: env
+    attributes:
+      label: 环境
+      description: Antigravity 版本、Windows 版本、代理类型（Antigravity-Manager / 机场 / 自建）、出口地区。
+  - type: input
+    id: log
+    attributes:
+      label: 日志关键行（可选）
+      description: `%LOCALAPPDATA%\Programs\antigravity\logs\proxy-*.log` 里 `HTTP CONNECT` 或 ERROR 行，能大幅加速定位。
